@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    direction: rtl;
+  }
+  body {
+    font-family: 'Tajawal', system-ui, sans-serif;
+    @apply bg-gray-50 text-gray-800;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-blue text-white px-4 py-2 rounded-lg font-bold hover:bg-brand-dark transition-colors;
+  }
+  .btn-danger {
+    @apply bg-brand-danger text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition-colors;
+  }
+  .btn-outline {
+    @apply border-2 border-brand-blue text-brand-blue px-4 py-2 rounded-lg font-bold hover:bg-brand-blue hover:text-white transition-colors;
+  }
+  .input-field {
+    @apply w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 outline-none transition;
+  }
+  .card {
+    @apply bg-white rounded-2xl p-6 shadow-sm;
+  }
+}
