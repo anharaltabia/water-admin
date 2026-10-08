@@ -26,17 +26,27 @@ export default function Login({ onLogin }) {
 
       const user = rows[0];
 
-      // ⚠️ مقارنة مباشرة (مؤقتاً) — سنستخدم bcrypt لاحقاً
       if (user.password_hash !== password) {
         setError('كلمة المرور غير صحيحة');
         setLoading(false);
         return;
       }
 
-      // حفظ الجلسة
+      // جلب الصلاحيات (إذا لم يكن admin)
+      let permissionCodes = [];
+      if (user.role !== 'admin') {
+        const permissions = await tursoQuery(
+          'SELECT p.code FROM permissions p INNER JOIN user_permissions up ON p.id = up.permission_id WHERE up.user_id = ?',
+          [user.id]
+        );
+        permissionCodes = (permissions || []).map(p => p.code);
+      }
+
       localStorage.setItem('admin_user', JSON.stringify({
         id: user.id,
         username: user.username,
+        role: user.role || 'editor',
+        permissions: permissionCodes,
         loginTime: Date.now(),
       }));
 
@@ -64,53 +74,25 @@ export default function Login({ onLogin }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-bold text-brand-dark mb-2">
-              اسم المستخدم
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="input-field"
-              placeholder="أدخل اسم المستخدم"
-              autoComplete="username"
-            />
+            <label className="block text-sm font-bold text-brand-dark mb-2">اسم المستخدم</label>
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required className="input-field" placeholder="أدخل اسم المستخدم" autoComplete="username" />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-brand-dark mb-2">
-              كلمة المرور
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="input-field"
-              placeholder="أدخل كلمة المرور"
-              autoComplete="current-password"
-            />
+            <label className="block text-sm font-bold text-brand-dark mb-2">كلمة المرور</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="input-field" placeholder="أدخل كلمة المرور" autoComplete="current-password" />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">
-              ⚠️ {error}
-            </div>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">⚠️ {error}</div>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full disabled:opacity-50"
-          >
+          <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">
             {loading ? 'جاري التحقق...' : 'تسجيل الدخول'}
           </button>
         </form>
 
-        <p className="text-xs text-gray-400 text-center mt-6">
-          © 2016 مياه أنهار الطبيعة
-        </p>
+        <p className="text-xs text-gray-400 text-center mt-6">© 2016 مياه أنهار الطبيعة</p>
       </div>
     </div>
   );

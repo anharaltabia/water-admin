@@ -9,6 +9,10 @@ export default function Layout({ user, onLogout, children }) {
   const [logo, setLogo] = useState(null);
   const [siteName, setSiteName] = useState('مياه أنهار الطبيعة');
 
+  const isAdmin = user?.role === 'admin';
+  const permissions = user?.permissions || [];
+  const has = (code) => isAdmin || permissions.includes(code);
+
   useEffect(() => {
     tursoQuery('SELECT site_name, logo_image FROM settings WHERE id = 1')
       .then(rows => {
@@ -20,17 +24,19 @@ export default function Layout({ user, onLogout, children }) {
       .catch(console.error);
   }, []);
 
-  const menuItems = [
-    { path: '/', label: 'الرئيسية', icon: Home },
-    { path: '/hero', label: 'الصفحة الرئيسية', icon: Palette },
-    { path: '/products', label: 'المنتجات', icon: Droplet },
-    { path: '/features', label: 'لماذا نحن', icon: Star },
-    { path: '/contact', label: 'التواصل', icon: Phone },
-    { path: '/settings', label: 'الإعدادات', icon: Settings },
-    { path: '/users', label: 'المستخدمين', icon: Users },
-    { path: '/footer', label: 'التذييل', icon: FileText },
-    { path: '/social', label: 'وسائل التواصل', icon: Share2 },
+  const allMenuItems = [
+    { path: '/', label: 'الرئيسية', icon: Home, permission: null },
+    { path: '/hero', label: 'الصفحة الرئيسية', icon: Palette, permission: 'hero.view' },
+    { path: '/products', label: 'المنتجات', icon: Droplet, permission: 'products.view' },
+    { path: '/features', label: 'لماذا نحن', icon: Star, permission: 'features.view' },
+    { path: '/contact', label: 'التواصل', icon: Phone, permission: 'contact.view' },
+    { path: '/social', label: 'وسائل التواصل', icon: Share2, permission: 'social.view' },
+    { path: '/footer', label: 'التذييل', icon: FileText, permission: 'footer.view' },
+    { path: '/settings', label: 'الإعدادات', icon: Settings, permission: 'settings.view' },
+    { path: '/users', label: 'المستخدمين', icon: Users, permission: 'users.view' },
   ];
+
+  const menuItems = allMenuItems.filter(item => !item.permission || has(item.permission));
 
   const LogoDisplay = ({ size = 'md' }) => {
     const sizeClasses = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10';
@@ -77,7 +83,10 @@ export default function Layout({ user, onLogout, children }) {
             </div>
             <div>
               <div className="text-gray-400">مسجل الدخول</div>
-              <div className="text-white font-bold">{user?.username}</div>
+              <div className="text-white font-bold">
+                {user?.username}
+                {isAdmin && <span className="mr-2 text-xs bg-yellow-500 text-black px-2 py-0.5 rounded">مدير</span>}
+              </div>
             </div>
           </div>
           <button onClick={onLogout} className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2">
