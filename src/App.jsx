@@ -49,15 +49,15 @@ export default function App() {
       <Layout user={user} onLogout={handleLogout}>
         <Routes>
           <Route path="/" element={<Dashboard user={user} />} />
-          <Route path="/hero" element={<ProtectedRoute user={user} permission="hero.view"><Hero /></ProtectedRoute>} />
-          <Route path="/products" element={<ProtectedRoute user={user} permission="products.view"><ProductsAdmin /></ProtectedRoute>} />
-          <Route path="/features" element={<ProtectedRoute user={user} permission="features.view"><FeaturesAdmin /></ProtectedRoute>} />
-          <Route path="/contact" element={<ProtectedRoute user={user} permission="contact.view"><ContactAdmin /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute user={user} permission="settings.view"><SettingsAdmin /></ProtectedRoute>} />
-          <Route path="/social" element={<ProtectedRoute user={user} permission="social.view"><SocialAdmin /></ProtectedRoute>} />
-          <Route path="/footer" element={<ProtectedRoute user={user} permission="footer.view"><FooterAdmin /></ProtectedRoute>} />
-          <Route path="/users" element={<ProtectedRoute user={user} permission="users.view"><Users /></ProtectedRoute>} />
-          <Route path="/users/:id/permissions" element={<ProtectedRoute user={user} permission="users.permissions"><UserPermissions /></ProtectedRoute>} />
+          <Route path="/hero" element={<ProtectedRoute user={user} permission="hero.view"><Hero user={user} /></ProtectedRoute>} />
+          <Route path="/products" element={<ProtectedRoute user={user} permission="products.view"><ProductsAdmin user={user} /></ProtectedRoute>} />
+          <Route path="/features" element={<ProtectedRoute user={user} permission="features.view"><FeaturesAdmin user={user} /></ProtectedRoute>} />
+          <Route path="/contact" element={<ProtectedRoute user={user} permission="contact.view"><ContactAdmin user={user} /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute user={user} permission="settings.view"><SettingsAdmin user={user} /></ProtectedRoute>} />
+          <Route path="/social" element={<ProtectedRoute user={user} permission="social.view"><SocialAdmin user={user} /></ProtectedRoute>} />
+          <Route path="/footer" element={<ProtectedRoute user={user} permission="footer.view"><FooterAdmin user={user} /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute user={user} permission="users.view"><Users user={user} /></ProtectedRoute>} />
+          <Route path="/users/:id/permissions" element={<ProtectedRoute user={user} permission="users.permissions"><UserPermissions user={user} /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
