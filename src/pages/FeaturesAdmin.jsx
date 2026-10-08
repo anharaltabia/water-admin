@@ -9,7 +9,7 @@ const ICONS = [
   { value: 'home', label: 'منزل' },
 ];
 
-export default function FeaturesAdmin() {
+export default function FeaturesAdmin({ user }) {
   const [features, setFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -17,6 +17,10 @@ export default function FeaturesAdmin() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({ title: '', description: '', icon_name: 'shield', sort_order: 0 });
+
+  const isAdmin = user?.role === 'admin';
+  const permissions = user?.permissions || [];
+  const can = (code) => isAdmin || permissions.includes(code);
 
   const loadFeatures = async () => {
     try {
@@ -29,6 +33,7 @@ export default function FeaturesAdmin() {
   useEffect(() => { loadFeatures(); }, []);
 
   const openAdd = () => {
+    if (!can('features.create')) return;
     setEditing(null);
     setForm({ title: '', description: '', icon_name: 'shield', sort_order: features.length + 1 });
     setError('');
@@ -36,13 +41,9 @@ export default function FeaturesAdmin() {
   };
 
   const openEdit = (item) => {
+    if (!can('features.edit')) return;
     setEditing(item);
-    setForm({
-      title: item.title || '',
-      description: item.description || '',
-      icon_name: item.icon_name || 'shield',
-      sort_order: item.sort_order || 0,
-    });
+    setForm({ title: item.title || '', description: item.description || '', icon_name: item.icon_name || 'shield', sort_order: item.sort_order || 0 });
     setError('');
     setShowModal(true);
   };
@@ -52,28 +53,20 @@ export default function FeaturesAdmin() {
     setSaving(true);
     setError('');
     if (!form.title) { setError('العنوان مطلوب'); setSaving(false); return; }
-
     try {
       if (editing) {
-        await tursoQuery(
-          'UPDATE features SET title = ?, description = ?, icon_name = ?, sort_order = ? WHERE id = ?',
-          [form.title, form.description, form.icon_name, form.sort_order, editing.id]
-        );
+        await tursoQuery('UPDATE features SET title = ?, description = ?, icon_name = ?, sort_order = ? WHERE id = ?', [form.title, form.description, form.icon_name, form.sort_order, editing.id]);
       } else {
-        await tursoQuery(
-          'INSERT INTO features (title, description, icon_name, sort_order) VALUES (?, ?, ?, ?)',
-          [form.title, form.description, form.icon_name, form.sort_order]
-        );
+        await tursoQuery('INSERT INTO features (title, description, icon_name, sort_order) VALUES (?, ?, ?, ?)', [form.title, form.description, form.icon_name, form.sort_order]);
       }
       setShowModal(false);
       loadFeatures();
-    } catch (err) {
-      console.error(err);
-      setError('حدث خطأ أثناء الحفظ');
-    } finally { setSaving(false); }
+    } catch (err) { console.error(err); setError('حدث خطأ'); }
+    finally { setSaving(false); }
   };
 
   const handleDelete = async (id, title) => {
+    if (!can('features.delete')) return;
     if (!confirm('حذف "' + title + '"؟')) return;
     try {
       await tursoQuery('DELETE FROM features WHERE id = ?', [id]);
@@ -88,15 +81,15 @@ export default function FeaturesAdmin() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-brand-dark flex items-center gap-2">
-            <Star className="w-6 h-6" />
-            إدارة "لماذا نحن"
+            <Star className="w-6 h-6" /> إدارة "لماذا نحن"
           </h1>
-          <p className="text-gray-500 text-sm mt-1">إضافة وتعديل الميزات</p>
+          <p className="text-gray-500 text-sm mt-1">{can('features.edit') ? 'إضافة وتعديل الميزات' : 'عرض فقط'}</p>
         </div>
-        <button onClick={openAdd} className="btn-primary flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          <span>إضافة ميزة</span>
-        </button>
+        {can('features.create') && (
+          <button onClick={openAdd} className="btn-primary flex items-center gap-2">
+            <Plus className="w-4 h-4" /> <span>إضافة ميزة</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -108,22 +101,26 @@ export default function FeaturesAdmin() {
             <div className="flex-1">
               <h3 className="font-bold text-brand-dark mb-1">{item.title}</h3>
               <p className="text-gray-500 text-sm mb-3">{item.description}</p>
-              <div className="flex items-center gap-2">
-                <button onClick={() => openEdit(item)} className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1">
-                  <Edit2 className="w-3 h-3" /> تعديل
-                </button>
-                <button onClick={() => handleDelete(item.id, item.title)} className="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1 rounded-lg text-xs transition">
-                  <Trash2 className="w-3 h-3" />
-                </button>
-              </div>
+              {(can('features.edit') || can('features.delete')) && (
+                <div className="flex items-center gap-2">
+                  {can('features.edit') && (
+                    <button onClick={() => openEdit(item)} className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                      <Edit2 className="w-3 h-3" /> تعديل
+                    </button>
+                  )}
+                  {can('features.delete') && (
+                    <button onClick={() => handleDelete(item.id, item.title)} className="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1 rounded-lg text-xs transition">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         ))}
       </div>
 
-      {features.length === 0 && (
-        <div className="card text-center py-12 text-gray-500">لا توجد ميزات بعد.</div>
-      )}
+      {features.length === 0 && <div className="card text-center py-12 text-gray-500">لا توجد ميزات.</div>}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
