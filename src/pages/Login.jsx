@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { tursoQuery } from '../lib/turso';
 
 export default function Login({ onLogin }) {
@@ -6,6 +6,20 @@ export default function Login({ onLogin }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [siteName, setSiteName] = useState('مياه أنهار الطبيعة');
+  const [copyright, setCopyright] = useState('');
+
+  // جلب الاسم + حقوق النشر من settings
+  useEffect(() => {
+    tursoQuery('SELECT site_name, footer_copyright FROM settings WHERE id = 1')
+      .then(rows => {
+        if (rows && rows[0]) {
+          if (rows[0].site_name) setSiteName(rows[0].site_name);
+          if (rows[0].footer_copyright) setCopyright(rows[0].footer_copyright);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -13,10 +27,7 @@ export default function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      const rows = await tursoQuery(
-        'SELECT * FROM admin_users WHERE username = ?',
-        [username]
-      );
+      const rows = await tursoQuery('SELECT * FROM admin_users WHERE username = ?', [username]);
 
       if (!rows || rows.length === 0) {
         setError('اسم المستخدم غير صحيح');
@@ -32,7 +43,6 @@ export default function Login({ onLogin }) {
         return;
       }
 
-      // جلب الصلاحيات (إذا لم يكن admin)
       let permissionCodes = [];
       if (user.role !== 'admin') {
         const permissions = await tursoQuery(
@@ -69,7 +79,7 @@ export default function Login({ onLogin }) {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-brand-dark">لوحة التحكم</h1>
-          <p className="text-gray-500 text-sm mt-1">مياه أنهار الطبيعة</p>
+          <p className="text-gray-500 text-sm mt-1">{siteName}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -92,7 +102,9 @@ export default function Login({ onLogin }) {
           </button>
         </form>
 
-        <p className="text-xs text-gray-400 text-center mt-6">© 2016 مياه أنهار الطبيعة</p>
+        {copyright && (
+          <p className="text-xs text-gray-400 text-center mt-6">{copyright}</p>
+        )}
       </div>
     </div>
   );
