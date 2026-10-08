@@ -9,6 +9,7 @@ import FeaturesAdmin from './pages/FeaturesAdmin';
 import ContactAdmin from './pages/ContactAdmin';
 import SettingsAdmin from './pages/SettingsAdmin';
 import FooterAdmin from './pages/FooterAdmin';
+import SocialAdmin from './pages/SocialAdmin';
 import Users from './pages/Users';
 import UserPermissions from './pages/UserPermissions';
 
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="/contact" element={<ContactAdmin />} />
           <Route path="/settings" element={<SettingsAdmin />} />
           <Route path="/footer" element={<FooterAdmin />} />
+          <Route path="/social" element={<SocialAdmin />} />
           <Route path="/users" element={<Users />} />
           <Route path="/users/:id/permissions" element={<UserPermissions />} />
           <Route path="*" element={<Navigate to="/" replace />} />

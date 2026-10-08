@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Palette, Droplet, Star, Phone, Settings, Users, LogOut, Menu, X, FileText } from 'lucide-react';
+import { Home, Palette, Droplet, Star, Phone, Settings, Users, LogOut, Menu, X, FileText, Share2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { tursoQuery } from '../lib/turso';
 
@@ -29,6 +29,7 @@ export default function Layout({ user, onLogout, children }) {
     { path: '/settings', label: 'الإعدادات', icon: Settings },
     { path: '/users', label: 'المستخدمين', icon: Users },
     { path: '/footer', label: 'التذييل', icon: FileText },
+    { path: '/social', label: 'وسائل التواصل', icon: Share2 },
   ];
 
   const LogoDisplay = ({ size = 'md' }) => {

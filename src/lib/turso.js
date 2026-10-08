@@ -33,3 +33,7 @@ async function tursoQuery(sql, args = []) {
 }
 
 export { tursoQuery };
+
+export async function getSocialLinks() {
+  return tursoQuery('SELECT * FROM social_links WHERE is_active = 1 ORDER BY sort_order');
+}
